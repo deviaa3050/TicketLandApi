@@ -11,9 +11,9 @@ module.exports = {
       trainName: {
         type: Sequelize.STRING
       },
-      id_trainClass: {
-        type: Sequelize.INTEGER,
+      idTrainClass: {
         allowNull: false,
+        type: Sequelize.INTEGER,
         references: {
           model: "trainClasses",
           key: "id"
@@ -21,20 +21,37 @@ module.exports = {
         onUpdate: "cascade",
         onDelete: "cascade"
       },
-      dateStart: {
+      departureDate: {
         type: Sequelize.DATEONLY
       },
-      departure: {
+      departureTime: {
         type: Sequelize.TIME
       },
-      arrival: {
+      idFrom: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: "stations",
+          key: "id"
+        },
+        onUpdate: "cascade",
+        onDelete: "cascade"
+      },
+      arrivalDate: {
+        type: Sequelize.DATEONLY
+      },
+      arrivalTime: {
         type: Sequelize.TIME
       },
-      from: {
-        type: Sequelize.STRING
-      },
-      to: {
-        type: Sequelize.STRING
+      idTo: {
+        allowNull: false,
+        type: Sequelize.INTEGER,
+        references: {
+          model: "stations",
+          key: "id"
+        },
+        onUpdate: "cascade",
+        onDelete: "cascade"
       },
       price: {
         type: Sequelize.INTEGER

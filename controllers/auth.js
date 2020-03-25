@@ -20,7 +20,8 @@ exports.login = async (req, res) => {
           data: data,
           status: true,
           username,
-          token
+          token,
+          role: data.role
         });
       } else {
         res.send({ message: "Username or Password is Invalid" });
@@ -43,7 +44,8 @@ exports.register = async (req, res) => {
       password,
       gender,
       phone,
-      address
+      address,
+      role
     } = req.body;
 
     const findMail = await User.findOne({
@@ -54,22 +56,35 @@ exports.register = async (req, res) => {
       res.send({ message: "Email Exist" });
     } else {
       const hash = await bcrypt.hash(password, 10);
-      const data = await User.create({
+      const data1 = await User.create({
         name,
         username,
         email,
         password: hash,
         gender,
         phone,
-        address
+        address,
+        role
       });
-      if (data) {
-        const token = jwt.sign({ user_id: data.id }, process.env.SECRET_KEY);
-        res.send({
-          message: "Register Success",
-          data: { username, email },
-          token: token
+      if (data1) {
+        const data = await User.findOne({
+          where: { email },
+          attributes: {
+            exclude: ["name", "password", "gender", "phone", "address", "role"]
+          }
         });
+
+        if (data) {
+          const token = jwt.sign({ user_id: data.id }, process.env.SECRET_KEY);
+          res.send({
+            message: "Register Success",
+            username,
+            token,
+            role
+          });
+        } else {
+          res.send("There are some errors");
+        }
       } else {
         res.send({ message: "Register Failed" });
       }
@@ -77,5 +92,24 @@ exports.register = async (req, res) => {
   } catch (error) {
     res.send("Catched");
     console.log(error);
+  }
+};
+
+exports.checkUser = async (req, res) => {
+  try {
+    const data = await User.findOne({
+      where: { id: req.user },
+      attributes: {
+        exclude: ["createdAt", "updatedAt", "password"]
+      }
+    });
+
+    if (data) {
+      res.send(data);
+    } else {
+      res.send({ message: "Not Found" });
+    }
+  } catch (error) {
+    res.send({ message: "error" });
   }
 };

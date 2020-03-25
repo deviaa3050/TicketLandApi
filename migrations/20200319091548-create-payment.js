@@ -1,16 +1,16 @@
 "use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("tickets", {
+    return queryInterface.createTable("payments", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      id_user: {
-        type: Sequelize.INTEGER,
+      user_id: {
         allowNull: false,
+        type: Sequelize.INTEGER,
         references: {
           model: "users",
           key: "id"
@@ -18,9 +18,9 @@ module.exports = {
         onUpdate: "cascade",
         onDelete: "cascade"
       },
-      id_train: {
-        type: Sequelize.INTEGER,
+      train_id: {
         allowNull: false,
+        type: Sequelize.INTEGER,
         references: {
           model: "trains",
           key: "id"
@@ -28,9 +28,9 @@ module.exports = {
         onUpdate: "cascade",
         onDelete: "cascade"
       },
-      id_trainClass: {
-        type: Sequelize.INTEGER,
+      trainClass_id: {
         allowNull: false,
+        type: Sequelize.INTEGER,
         references: {
           model: "trainClasses",
           key: "id"
@@ -44,11 +44,11 @@ module.exports = {
       totalPrice: {
         type: Sequelize.INTEGER
       },
-      status: {
-        type: Sequelize.ENUM("pending", "finished")
-      },
       attachment: {
         type: Sequelize.STRING
+      },
+      status: {
+        type: Sequelize.ENUM("pending", "cancelled", "approved")
       },
       createdAt: {
         allowNull: false,
@@ -61,6 +61,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("tickets");
+    return queryInterface.dropTable("payments");
   }
 };

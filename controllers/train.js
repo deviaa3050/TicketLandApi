@@ -3,28 +3,32 @@ const moment = require("moment");
 
 const Train = models.train;
 const TrainClass = models.trainClass;
+const Station = models.station;
+const User = models.user;
 
-exports.showTrains = async (req, res) => {
+exports.searchTrainByDate = async (req, res) => {
   try {
-    const { dateStart } = req.query;
-    console.log(dateStart);
+    const { departureDate } = req.query;
+    console.log(departureDate);
     const data = await Train.findAll({
-      where: { dateStart },
+      where: { departureDate },
+      attributes: {
+        exclude: ["idTrainClass"]
+      },
       include: [
         {
           model: TrainClass,
-          as: "type",
-          attributes: ["id", "className"]
+          as: "trainTrainClass",
+          attributes: ["className"]
         }
-      ],
-      exclude: ["id_trainCLass"]
+      ]
     });
 
     if (data) {
-      res.send({ message: "data found", data: data });
+      res.send({ message: "data found", data });
     } else {
       console.log(data);
-      res.send({ message: "data not found", data: data });
+      res.send({ message: "data not found", data });
     }
   } catch (error) {
     res.send(error);
@@ -32,17 +36,48 @@ exports.showTrains = async (req, res) => {
   }
 };
 
-exports.showTrain = async (req, res) => {
+exports.searchTrain = async (req, res) => {
   try {
-    const { dateStart, from, to } = req.body;
-    console.log(req.body);
-    const data = await Train.findAll({
-      where: { dateStart, from, to }
+    const { departureDate, from, to } = req.body;
+    console.log("haai", req.body);
+    const idFrom = await Station.findOne({
+      where: { stationName: from },
+      attributes: ["id"]
     });
-    res.send({ message: "Show", data });
+    console.log(idFrom);
+
+    const idTo = await Station.findOne({
+      where: { stationName: to },
+      attributes: ["id"]
+    });
+
+    console.log(req.query);
+    const data = await Train.findAll({
+      where: { departureDate, idFrom: idFrom.id, idTo: idTo.id },
+      attributes: {
+        exclude: ["idTrainClass", "idFrom", "idTo"]
+      },
+      include: [
+        {
+          model: TrainClass,
+          as: "trainTrainClass",
+          attributes: ["className"]
+        },
+        {
+          model: Station,
+          as: "trainFrom",
+          attributes: ["stationName"]
+        },
+        {
+          model: Station,
+          as: "trainTo",
+          attributes: ["stationName"]
+        }
+      ]
+    });
 
     if (data) {
-      res.send({ message: "Show", data });
+      res.send({ message: "data found", data });
     } else {
       res.send({ message: "No data" });
     }
@@ -54,23 +89,34 @@ exports.showTrain = async (req, res) => {
 
 exports.showTrainsAll = async (req, res) => {
   try {
-    const { from, to, dateStart } = req.body;
     const data = await Train.findAll({
+      attributes: {
+        exclude: ["idTrainClass", "idFrom", "idTo", "createdAt", "updatedAt"]
+      },
       include: [
         {
           model: TrainClass,
-          as: "type",
-          attributes: ["id", "className"]
+          as: "trainTrainClass",
+          attributes: ["className"]
+        },
+        {
+          model: Station,
+          as: "trainFrom",
+          attributes: ["code", "stationName", "city"]
+        },
+        {
+          model: Station,
+          as: "trainTo",
+          attributes: ["code", "stationName", "city"]
         }
-      ],
-      exclude: ["id_trainCLass"]
+      ]
     });
 
     if (data) {
-      res.send({ message: "data found", data: data });
+      res.send({ message: "data found", data });
     } else {
       console.log(data);
-      res.send({ message: "data not found", data: data });
+      res.send({ message: "data not found", data });
     }
   } catch (error) {
     res.send(error);
@@ -80,36 +126,49 @@ exports.showTrainsAll = async (req, res) => {
 
 exports.addTrain = async (req, res) => {
   try {
-    const {
-      trainName,
-      id_trainClass,
-      dateStart,
-      departure,
-      arrival,
-      from,
-      to,
-      price,
-      quantity
-    } = req.body;
+    const id_user = req.user;
 
-    const dates = moment(dateStart).format("DD/MM/YYYY");
-
-    const data = await Train.create({
-      trainName,
-      id_trainClass,
-      dateStart: dates,
-      departure,
-      arrival,
-      from,
-      to,
-      price,
-      quantity
+    const admin = await User.findOne({
+      where: { id: id_user }
     });
 
-    if (data) {
-      res.send({ message: "Data created", data: data });
+    if (admin.role == "admin") {
+      const {
+        trainName,
+        idTrainClass,
+        departureDate,
+        departureTime,
+        idFrom,
+        arrivalDate,
+        arrivalTime,
+        idTo,
+        price,
+        quantity
+      } = req.body;
+
+      const departureDates = moment(departureDate).format();
+      const arrivalDates = moment(arrivalDate).format();
+
+      const data = await Train.create({
+        trainName,
+        idTrainClass,
+        departureDate: departureDates,
+        departureTime,
+        idFrom,
+        arrivalDate: arrivalDates,
+        arrivalTime,
+        idTo,
+        price,
+        quantity
+      });
+
+      if (data) {
+        res.send({ message: "Data created", data: data });
+      } else {
+        res.send({ message: "Data not created" });
+      }
     } else {
-      res.send({ message: "Data not created" });
+      res.send({ message: "Only Admin has Authorization for this action" });
     }
   } catch (error) {
     res.send(error);

@@ -10,9 +10,10 @@ module.exports = {
           username: "test",
           email: "test@gmail.com",
           password: "initest",
-          gender: "male",
-          phone: "083896831233",
+          gender: "female",
+          phone: "12345",
           address: "Di Rumah Test",
+          role: "user",
           createdAt: new Date(),
           updatedAt: new Date()
         }

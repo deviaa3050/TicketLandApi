@@ -3,16 +3,16 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.bulkInsert(
-      "tickets",
+      "payments",
       [
         {
-          id_user: 1,
-          id_train: 1,
-          id_trainClass: 1,
+          user_id: 1,
+          train_id: 1,
+          trainClass_id: 1,
           totalTicket: 1,
           totalPrice: 300000,
+          attachment: "",
           status: "pending",
-          attachment: "http://inipunyatest.com",
           createdAt: new Date(),
           updatedAt: new Date()
         }
@@ -22,6 +22,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-    return queryInterface.bulkDelete("tickets", null, {});
+    return queryInterface.bulkDelete("payments", null, {});
   }
 };

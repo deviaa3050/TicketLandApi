@@ -4,12 +4,13 @@ module.exports = (sequelize, DataTypes) => {
     "train",
     {
       trainName: DataTypes.STRING,
-      id_trainClass: DataTypes.INTEGER,
-      dateStart: DataTypes.DATEONLY,
-      departure: DataTypes.TIME,
-      arrival: DataTypes.TIME,
-      from: DataTypes.STRING,
-      to: DataTypes.STRING,
+      idTrainClass: DataTypes.INTEGER,
+      departureDate: DataTypes.DATEONLY,
+      departureTime: DataTypes.TIME,
+      idFrom: DataTypes.INTEGER,
+      arrivalDate: DataTypes.DATEONLY,
+      arrivalTime: DataTypes.TIME,
+      idTo: DataTypes.INTEGER,
       price: DataTypes.INTEGER,
       quantity: DataTypes.INTEGER
     },
@@ -17,8 +18,18 @@ module.exports = (sequelize, DataTypes) => {
   );
   train.associate = function(models) {
     train.belongsTo(models.trainClass, {
-      foreignKey: "id_trainClass",
-      as: "type"
+      foreignKey: "idTrainClass",
+      as: "trainTrainClass"
+    });
+
+    train.belongsTo(models.station, {
+      foreignKey: "idFrom",
+      as: "trainFrom"
+    });
+
+    train.belongsTo(models.station, {
+      foreignKey: "idTo",
+      as: "trainTo"
     });
   };
   return train;
